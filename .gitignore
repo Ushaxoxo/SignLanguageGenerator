@@ -69,3 +69,5 @@ src/assets/promotional/about/android/*.png
 
 package-lock.json
 bun.lockb
+
+src/environments/
