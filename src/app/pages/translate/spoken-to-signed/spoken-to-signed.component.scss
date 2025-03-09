@@ -4,7 +4,7 @@
   display: grid;
   width: 100%;
   grid-template-areas: 'spoken signwriting signed';
-  grid-template-columns: auto 100px 50%;
+  grid-template-columns: 0px 1px 100%;
 
   @media #{breakpoints.$breakpoint-lt-sm} {
     grid-template-areas: 'signed signed' 'spoken signwriting';
@@ -17,13 +17,6 @@
 
   > *:not(:last-child) {
     border-inline-end: 1px solid var(--app-divider-color);
-  }
-}
-
-app-sign-writing {
-  @media #{breakpoints.$breakpoint-lt-sm} {
-    border: none !important;
-    height: 195px;
   }
 }
 

@@ -47,14 +47,19 @@ export class AnimationState implements NgxsOnInit {
       .pipe(
         filter(Boolean),
         filter(() => this.isAnimatePose), // Only run if needed
-        tap((pose: EstimatedPose) => dispatch(new AnimatePose(pose)))
+        tap((pose: EstimatedPose) => {
+          console.log('🔥 dispatch(new AnimatePose(pose)) is being called with pose:', pose);
+          dispatch(new AnimatePose(pose));
+        })
       )
       .subscribe();
   }
 
   @Action(AnimatePose)
   async animatePose({getState, patchState}: StateContext<AnimationStateModel>, {pose}: AnimatePose): Promise<void> {
+    console.log('🔥 Calling estimate() with pose:', pose);
     const tracks = this.animation.estimate([pose]);
+    console.log('🔥 estimate() returned:', tracks);
     patchState({tracks});
   }
 }

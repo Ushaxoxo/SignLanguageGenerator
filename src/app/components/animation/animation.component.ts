@@ -108,15 +108,14 @@ export class AnimationComponent extends BaseComponent implements AfterViewInit {
   }
 
   async attach3DCharacter() {
-    const attributes: {[key: string]: string} = {src: '3d/character.glb'};
-    if (isIOS) {
-      attributes['ios-src'] = '3d/character.usdz';
-    }
+    const el = this.modelViewerEl().nativeElement;
 
-    // Download the files serially
-    for (const [attribute, assetName] of Object.entries(attributes)) {
-      const uri = await this.assets.getFileUri(assetName);
-      this.modelViewerEl().nativeElement.setAttribute(attribute, uri);
+    // Set the local file path directly
+    el.setAttribute('src', 'assets/3d/character.glb');
+
+    // If running on iOS, set the iOS-specific format
+    if (isIOS) {
+      el.setAttribute('ios-src', 'assets/3d/character.usdz');
     }
   }
 }

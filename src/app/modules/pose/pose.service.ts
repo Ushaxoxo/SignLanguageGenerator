@@ -66,7 +66,10 @@ export class PoseService {
 
       // Track following results
       this.model.onResults(results => {
+        console.log('📌 Pose Detection Results:', results);
+
         for (const callback of this.onResultsCallbacks) {
+          console.log('📌 Calling Pose Callbacks with:', results);
           callback(results);
         }
       });

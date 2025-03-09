@@ -63,15 +63,22 @@ export class SignWritingTranslationService {
     from: string,
     to: string
   ): Promise<TranslationResponse> {
-    await this.loadOfflineModel(direction, from, to);
+    console.log('📌 Loading Offline Model for:', from, '→', to);
 
+    await this.loadOfflineModel(direction, from, to);
+    console.log('📌 Offline Model Loaded Successfully');
+
+    console.log('📌 Sending Text to Offline Translator:', text);
     let translations = await this.worker.translate(from, to, [text], [{isHtml: false}]);
+
+    console.log('📌 Raw Translation Response:', translations);
     if (typeof translations[0] === 'string') {
       translations = translations.map((t: any) => ({text: t}));
     }
 
     translations = translations.map(({text}) => ({text: this.postProcessSignWriting(text)}));
 
+    console.log('📌 Final Processed Translation:', translations[0]);
     return translations[0];
   }
 
@@ -82,9 +89,8 @@ export class SignWritingTranslationService {
     from: string,
     to: string
   ): Observable<TranslationResponse> {
-    // TODO use the new API (when bergamot model is trained)
-    // const query = new URLSearchParams({from, to, text});
-    // return this.http.get<TranslationResponse>(`https://sign.mt/api/${direction}?${query}`);'
+    console.log('📌 Sending Text to Online API:', text);
+    console.log('📌 Sentences Array:', sentences);
 
     const url = 'https://sign.mt/api/spoken-text-to-signwriting';
     const body = {
@@ -95,16 +101,19 @@ export class SignWritingTranslationService {
       },
     };
 
+    console.log('📌 Online API Request Body:', body);
     interface SpokenToSignWritingResponse {
       result: {
         input: string[];
         output: string[];
       };
     }
-
-    return this.http
-      .post<SpokenToSignWritingResponse>(url, body)
-      .pipe(map(res => ({text: res.result.output.join(' ')})));
+    return this.http.post<SpokenToSignWritingResponse>(url, body).pipe(
+      map(res => {
+        console.log('📌 Online API Response:', res);
+        return {text: res.result.output.join(' ')};
+      })
+    );
   }
 
   translateSpokenToSignWriting(
@@ -114,30 +123,49 @@ export class SignWritingTranslationService {
     signedLanguage: string
   ): Observable<TranslationResponse> {
     const direction: TranslationDirection = 'spoken-to-signed';
+
+    console.log('📌 Original Spoken Text:', text);
+    console.log('📌 Sentences for Translation:', sentences);
+    console.log('📌 Spoken Language:', spokenLanguage, '| Signed Language:', signedLanguage);
+
     const offlineSpecific = () => {
       const newText = `${this.preProcessSpokenText(text)}`;
+      console.log('📌 Pre-Processed Text for Offline Translation:', newText);
       return from(this.translateOffline(direction, newText, spokenLanguage, signedLanguage));
     };
 
     const offlineGeneric = () => {
       const newText = `$${spokenLanguage} $${signedLanguage} ${this.preProcessSpokenText(text)}`;
+      console.log('📌 Generic Offline Translation Text:', newText);
       return from(this.translateOffline(direction, newText, 'spoken', 'signed'));
     };
 
-    const online = () => this.translateOnline(direction, text, sentences, spokenLanguage, signedLanguage);
+    const online = () => {
+      console.log('📌 Attempting Online Translation...');
+      return this.translateOnline(direction, text, sentences, spokenLanguage, signedLanguage);
+    };
 
     return offlineSpecific().pipe(
-      catchError(offlineGeneric),
+      catchError(err => {
+        console.error('❌ Offline-Specific Translation Failed:', err);
+        return offlineGeneric();
+      }),
       filter(() => !('navigator' in globalThis) || navigator.onLine),
-      catchError(online)
+      catchError(err => {
+        console.error('❌ Offline Generic Translation Failed:', err);
+        return online();
+      })
     );
   }
 
   preProcessSpokenText(text: string) {
+    console.log('📌 Pre-Processing Input Text:', text);
     return text.replace('\n', ' ');
   }
 
   postProcessSignWriting(text: string) {
+    console.log('📌 Raw SignWriting Output:', text);
+
     // remove all tokens that start with a $
     text = text.replace(/\$[^\s]+/g, '');
 
@@ -145,6 +173,7 @@ export class SignWritingTranslationService {
     text = text.replace(/ /g, '');
     text = text.replace(/(\d)M/g, '$1 M');
 
+    console.log('📌 Processed SignWriting Output:', text);
     return text;
   }
 }

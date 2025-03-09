@@ -1,5 +1,13 @@
 <ng-container *transloco="let t; read: 'speech-to-text'">
-  <!-- As a single button it is uglier code, but nice ripple animation -->
+  <!-- Video and Captions Container -->
+  <div class="video-container">
+    <video #videoElement autoplay muted></video>
+    <!-- Webcam feed -->
+    <div class="captions">{{ transcribedText }}</div>
+    <!-- Captions overlay -->
+  </div>
+
+  <!-- Record Button -->
   @if (!supportError) {
     <ion-button
       class="circle-icon"
@@ -13,7 +21,6 @@
       <ion-icon [name]="isRecording ? 'stop-circle-outline' : 'mic-outline'" slot="icon-only" color="primary" />
     </ion-button>
   } @else {
-    <!-- If language is not supported -->
     <ion-button
       class="circle-icon"
       fill="clear"

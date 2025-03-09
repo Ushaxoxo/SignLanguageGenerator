@@ -192,4 +192,29 @@ export abstract class BasePoseViewerComponent extends BaseComponent implements O
       this.videoEncoder.close();
     }
   }
+
+  // Method to log the API endpoint
+  logEndpoint(text: string, signedLanguage: string): void {
+    const endpoint = `https://us-central1-sign-mt.cloudfunctions.net/spoken_text_to_signed_pose?text=${text}&spoken=en&signed=${signedLanguage}`;
+    console.log('API Endpoint:', endpoint);
+  }
+
+  // Example method to fetch pose data
+  async fetchPoseData(text: string, signedLanguage: string = 'ase'): Promise<void> {
+    // Log the endpoint
+    console.log('fetchPoseData method called'); // Add this line
+
+    this.logEndpoint(text, signedLanguage);
+
+    try {
+      console.log('Fetching pose data...');
+      const response = await fetch(
+        `https://us-central1-sign-mt.cloudfunctions.net/spoken_text_to_signed_pose?text=${text}&spoken=en&signed=${signedLanguage}`
+      );
+      const data = await response.json();
+      console.log('Pose Data:', data);
+    } catch (error) {
+      console.error('Error fetching pose data:', error);
+    }
+  }
 }

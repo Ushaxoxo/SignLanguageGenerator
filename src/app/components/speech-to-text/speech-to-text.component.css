@@ -1,0 +1,45 @@
+/* Container for video and captions */
+/* Make video occupy the entire viewport */
+.video-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  border: none; /* Remove border if not needed */
+  border-radius: 0; /* Remove rounded corners */
+  overflow: hidden;
+  z-index: -1; /* Push it to the background if needed */
+}
+
+/* Ensure video fills the whole screen */
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Captions styling */
+.captions {
+  position: absolute;
+  bottom: 60px; /* Position captions at the bottom */
+  left: 50%;
+  transform: translateX(-50%); /* Center captions horizontally */
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  color: white; /* Caption text color */
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 35px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  white-space: nowrap; /* Prevent text from wrapping */
+}
+
+/* Button styling */
+.circle-icon {
+  position: absolute;
+  bottom: 20px; /* Position button at the bottom */
+  left: 50%;
+  transform: translateX(-50%); /* Center button horizontally */
+  z-index: 10; /* Ensure button is above video and captions */
+}

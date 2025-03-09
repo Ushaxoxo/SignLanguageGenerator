@@ -70,7 +70,9 @@ const ANIMATION_KEYS = [
 export class AnimationService {
   private tf = inject(TensorflowService);
   private poseService = inject(PoseService);
-
+  constructor() {
+    console.log('✅ AnimationService Initialized!');
+  }
   sequentialModel: LayersModel;
 
   async loadModel(): Promise<LayersModel> {
@@ -91,20 +93,33 @@ export class AnimationService {
 
   estimate(poses: EstimatedPose[]): {[key: string]: [number, number, number, number][]} {
     if (!this.sequentialModel) {
+      console.warn('Animation Model is not loaded!');
       return null;
     }
 
+    console.log(' @@@ Received poses:', poses); // Check incoming pose data
+
     const quaternions = this.tf.tidy(() => {
       const normalized = poses.map(pose => this.normalizePose(pose).reshape([1, 75 * 3]));
+      console.log('@@@ Normalized pose:', normalized); // Ensure poses are normalized correctly
+
       const stack = this.tf.stack(normalized, 1);
+      console.log('@@@ Stacked input tensor:', stack); // Verify if the input tensor is correct
+
       const pred: Tensor = this.sequentialModel.predict(stack) as Tensor;
+      console.log('@@@ Prediction output:', pred.arraySync()); // Verify the model output
+
       const sequence = pred.reshape([normalized.length, ANIMATION_KEYS.length, 4]);
       const keysSequence = sequence.transpose([1, 0, 2]);
+
       return keysSequence.arraySync();
     });
 
+    console.log('@@@ Generated quaternions:', quaternions); // Check the final animation tracks
+
     const tracks = {};
     ANIMATION_KEYS.forEach((k, i) => (tracks[k] = quaternions[i]));
+
     return tracks;
   }
 }
